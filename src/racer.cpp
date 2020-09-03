@@ -21,8 +21,6 @@ bool check_dir(fs::path game_folder) {
 
 void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
 
-    cout << mdl_path << endl;
-    cout << output_path << endl;
     // Reading the raw character file
     ifstream racer_model(mdl_path, ios::in | ios::binary);
 
