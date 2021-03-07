@@ -58,7 +58,7 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
         if (edges == 1) {
 
             // Checking if it belongs to this mesh
-            if ((vc.color & 0x38000000) == 0) {
+            if ((vc.cmd & 0x38) == 0) {
 
                 // If not, then the next vertex will belong to a new mesh
                 new_obj = true;
@@ -66,7 +66,7 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
             }
 
             // Checking if the polygon is a quad
-            if ((vc.color & 0x38000000) == 0x38000000) {
+            if ((vc.cmd & 0x38) == 0x38) {
                 polygon = 4;
             } else {
                 // Set the polygon as a triangle
@@ -85,7 +85,7 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
         // Read the vertex positions and write them to the .obj
         racer_model.read((char *) &v, sizeof(v));
         num_vertex += 1;
-        output_file << "v " << v.x * -1 << " " << v.y * -1 << " " << v.z * -1 << endl;
+        output_file << "v " << (v.x * -1) / 127.0 << " " << (v.y * -1) / 127.0 << " " << (v.z * -1) / 127.0 << " " << vc.r / 255.0 << " " << vc.g / 255.0 << " " << vc.b / 255.0 << endl;
 
         // If the vertex is the last of the face, write the face to the .obj
         if (polygon == edges) {
