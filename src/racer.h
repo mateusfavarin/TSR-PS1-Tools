@@ -21,6 +21,4 @@ struct VERTEX {
     uint16_t palette;
 };
 
-bool check_dir(fs::path game_folder);
 void mdl_to_obj(fs::path mdl_path, fs::path output_path);
-void extract_racer_models(fs::path game_folder, fs::path output_folder);

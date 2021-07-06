@@ -1,23 +1,7 @@
-#include <iostream>
 #include <fstream>
 #include "racer.h"
 
 using namespace std;
-namespace fs = std::filesystem;
-
-bool check_dir(fs::path game_folder) {
-
-    // Checking if the current directory has RACERS/ folder in it
-    for (const auto& entry : fs::directory_iterator(game_folder)) {
-        string file_name = entry.path().filename().string();
-
-        if (file_name == "RACERS") {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
 
@@ -98,40 +82,5 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
         } else {
             edges += 1;
         }
-    }
-}
-
-void extract_racer_models(fs::path game_folder, fs::path output_folder) {
-
-    // Checking if the specified folder is valid
-    if (check_dir(game_folder)) {
-
-        // Giving user feedback about the software progress
-        cout << "Extracting RACERS/ models..." << endl;
-
-        // Creating a folder to store the 3D models in the output
-        output_folder = output_folder / "RACERS/";
-        fs::create_directory(output_folder);
-
-        // Searching for every .MDL file in the RACERS/ folder
-        game_folder = game_folder / "RACERS/";
-        for (const auto& entry : fs::directory_iterator(game_folder)) {
-            string file_name = entry.path().filename().string();
-            string file_extension = entry.path().extension().string();
-
-            if (file_extension == ".MDL") {
-
-                // Convert the .MDL to .obj
-                mdl_to_obj(game_folder / file_name, output_folder / file_name.substr(0, file_name.size() - 4));
-                cout << file_name << " extracted successfully." << endl;
-            }
-        }
-
-        cout << "RACERS/ extracted successfully..." << endl;
-
-    } else {
-
-        // Alert user that the specified folder is wrong
-        cout << "ERROR: Couldn't find RACERS/ in the specified folder. Please extract the Toy Story Racer game files and make sure that they're in the specified folder." << endl;
     }
 }

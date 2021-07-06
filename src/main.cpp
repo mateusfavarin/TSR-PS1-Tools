@@ -1,6 +1,6 @@
 #include <iostream>
 #include <filesystem>
-#include "racer.h"
+#include "extractor.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -27,5 +27,5 @@ int main(int argc, char* argv[]) {
     fs::path output_folder("./Output/");
     fs::create_directory(output_folder);
 
-    extract_racer_models(folder, output_folder);
+    extract_folders(folder, output_folder);
 }
