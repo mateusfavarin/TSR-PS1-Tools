@@ -13,9 +13,27 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
     racer_model.read((char *) &header, sizeof(header));
     header.size *= 2;
 
+    // Saving seek position to read the mesh data later
+    streampos temp = racer_model.tellg();
+
+    // Reading mesh count
+    MESH_HEADER mh;
+    racer_model.seekg(header.size, ios::beg);
+    racer_model.read((char *) &mh, sizeof(mh));
+
+    // Reading mesh metadata
+    MESH_METADATA metadata[mh.mesh_count];
+    for (int i = 0; i < mh.mesh_count; i++) {
+        racer_model.read((char *) &metadata[i], sizeof(metadata[i]));
+    }
+
+    // Restoring the seek position to read the mesh data
+    racer_model.seekg(temp, ios::beg);
+
     // Creating structures to read the vertex information
     VERTEX_COLOR vc;
     VERTEX v;
+
     // Creating the .obj output file
     ofstream output_file(output_path.string() + ".obj", ios::out);
 
@@ -26,12 +44,12 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
     // Index to keep track of the number of vertexes found
     int num_vertex = 0;
     // Index to keep track of the number of meshes found
-    int num_meshes = 1;
-    // Bool to keep track the creating of new meshes objects
+    int num_meshes = 0;
+    // Bool to keep track of when to create new meshes objects
     bool new_obj = true;
 
     // While there are vertexes bytes to be read
-    while (racer_model.tellg() < header.size) {
+    while (num_meshes < mh.mesh_count * 2) {
 
         /* Read the color command that goes to the GTE. They encoded
         in these bytes whether the polygon is a triangle or a quad. Also,
@@ -40,12 +58,11 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
 
         // If it's the first edge of the face
         if (edges == 1) {
-
             // Checking if it belongs to this mesh
             if ((vc.cmd & 0x38) == 0) {
-
                 // If not, then the next vertex will belong to a new mesh
                 new_obj = true;
+                num_meshes++;
                 continue;
             }
 
@@ -59,9 +76,8 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
 
             // Checking if this vertex belongs to a new object
             if (new_obj) {
-
                 // Create new mesh in the .obj
-                output_file << "o MESH_" << num_meshes++ << endl;
+                output_file << "o MESH_" << num_meshes << endl;
                 new_obj = false;
             }
         }
@@ -69,7 +85,11 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
         // Read the vertex positions and write them to the .obj
         racer_model.read((char *) &v, sizeof(v));
         num_vertex += 1;
-        output_file << "v " << (v.x * -1) / 127.0 << " " << (v.y * -1) / 127.0 << " " << (v.z * -1) / 127.0 << " " << vc.r / 255.0 << " " << vc.g / 255.0 << " " << vc.b / 255.0 << endl;
+        output_file << "v "
+                    << ((v.x + metadata[num_meshes / 2].trans_x) * -1) / 127.0 << " "
+                    << ((v.y + metadata[num_meshes / 2].trans_y) * -1) / 127.0 << " "
+                    << ((v.z + metadata[num_meshes / 2].trans_z) * -1) / 127.0 << " "
+                    << vc.r / 255.0 << " " << vc.g / 255.0 << " " << vc.b / 255.0 << endl;
 
         // If the vertex is the last of the face, write the face to the .obj
         if (polygon == edges) {
