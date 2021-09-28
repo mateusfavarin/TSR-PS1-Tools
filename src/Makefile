@@ -1,6 +1,6 @@
 CC = g++
 FLAGS = -std=c++17
-CPP_FILES = main.cpp extractor.cpp racer.cpp course.cpp raw.cpp
+CPP_FILES = main.cpp extractor.cpp racer.cpp
 PROGRAM = extractor
 
 all: $(CPP_FILES)

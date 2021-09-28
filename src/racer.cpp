@@ -22,9 +22,10 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
     racer_model.read((char *) &mh, sizeof(mh));
 
     // Reading mesh metadata
-    MESH_METADATA metadata[mh.mesh_count];
-    for (int i = 0; i < mh.mesh_count; i++) {
+    MESH_METADATA metadata[mh.obj_count];
+    for (int i = 0; i < mh.obj_count; i++) {
         racer_model.read((char *) &metadata[i], sizeof(metadata[i]));
+        metadata[i].obj_size *= 2;
     }
 
     // Restoring the seek position to read the mesh data
@@ -45,11 +46,13 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
     int num_vertex = 0;
     // Index to keep track of the number of meshes found
     int num_meshes = 0;
+    // Index to keep track of the number of objects found
+    int num_objects = 0;
     // Bool to keep track of when to create new meshes objects
     bool new_obj = true;
 
     // While there are vertexes bytes to be read
-    while (num_meshes < mh.mesh_count * 2) {
+    while (num_objects < mh.obj_count * 2) {
 
         /* Read the color command that goes to the GTE. They encoded
         in these bytes whether the polygon is a triangle or a quad. Also,
@@ -63,6 +66,11 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
                 // If not, then the next vertex will belong to a new mesh
                 new_obj = true;
                 num_meshes++;
+                // Checking whether this object has a low LOD mesh or not
+                if (vc.r != 2) {
+                    // If not, then we move on to the next object
+                    num_objects++;
+                }
                 continue;
             }
 
@@ -86,9 +94,9 @@ void mdl_to_obj(fs::path mdl_path, fs::path output_path) {
         racer_model.read((char *) &v, sizeof(v));
         num_vertex += 1;
         output_file << "v "
-                    << ((v.x + metadata[num_meshes / 2].trans_x) * -1) / 127.0 << " "
-                    << ((v.y + metadata[num_meshes / 2].trans_y) * -1) / 127.0 << " "
-                    << ((v.z + metadata[num_meshes / 2].trans_z) * -1) / 127.0 << " "
+                    << ((v.x + metadata[num_objects].trans_x) * -1) / 127.0 << " "
+                    << ((v.y + metadata[num_objects].trans_y) * -1) / 127.0 << " "
+                    << ((v.z + metadata[num_objects].trans_z) * -1) / 127.0 << " "
                     << vc.r / 255.0 << " " << vc.g / 255.0 << " " << vc.b / 255.0 << endl;
 
         // If the vertex is the last of the face, write the face to the .obj
