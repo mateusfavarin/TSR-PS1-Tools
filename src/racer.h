@@ -15,6 +15,7 @@ struct VERTEX_COLOR {
 };
 
 struct VERTEX {
+    VERTEX_COLOR vc;
     int16_t x;
     int16_t y;
     int16_t z;
@@ -33,4 +34,4 @@ struct MESH_METADATA {
     uint32_t unknown[15];
 };
 
-void mdl_to_obj(fs::path mdl_path, fs::path output_path);
+bool mdl_to_obj(fs::path mdl_path, fs::path output_path);

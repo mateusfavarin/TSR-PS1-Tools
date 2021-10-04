@@ -46,8 +46,11 @@ void extract_folders(fs::path game_folder, fs::path output_root) {
                 string file_extension = entry.path().extension().string();
 
                 if (file_extension == ".MDL") {
-                    mdl_to_obj(input_folder / file_name, output_folder / file_name.substr(0, file_name.size() - 4));
-                    cout << file_name << " extracted successfully." << endl;
+                    if (mdl_to_obj(input_folder / file_name, output_folder / file_name.substr(0, file_name.size() - 4))) {
+                        cout << file_name << " extracted successfully." << endl;
+                    } else {
+                        cout << "Error when extracting " << file_name << ": Wrong polygon data." << endl;
+                    }
                 }
             }
 
