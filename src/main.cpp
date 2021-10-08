@@ -19,7 +19,6 @@ int main(int argc, char* argv[]) {
             // If not, append the "/" at the end
             path += "/";
         }
-        // Set folder to the path
         folder = path;
     }
 

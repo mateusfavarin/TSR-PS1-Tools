@@ -2,6 +2,7 @@
 #include <filesystem>
 #include "extractor.h"
 #include "racer.h"
+#include "course.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -35,7 +36,7 @@ void extract_folders(fs::path game_folder, fs::path output_root) {
             // Giving user feedback about the software progress
             cout << "Extracting " << folders[i] << "/..." << endl;
 
-            // Creating a folder to store the 3D models in the output
+            // Creating a folder to store the extraction output
             output_folder = output_root / folders[i];
             fs::create_directory(output_folder);
 
@@ -52,9 +53,16 @@ void extract_folders(fs::path game_folder, fs::path output_root) {
                         cout << "Error when extracting " << file_name << ": Wrong polygon data." << endl;
                     }
                 }
+
+                if (file_extension == ".RAW") {
+                    fs::path raw_output = output_folder / file_name.substr(0, file_name.size() - 4);
+                    fs::create_directory(raw_output);
+                    decompress_raw(input_folder / file_name, raw_output);
+                    cout << file_name << " extracted successfully." << endl;
+                }
             }
 
-            cout << folders[i] << "/ extracted successfully..." << endl;
+            cout << folders[i] << "/ extracted successfully." << endl << endl;
 
         } else {
 
