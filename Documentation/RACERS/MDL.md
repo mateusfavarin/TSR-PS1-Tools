@@ -1,44 +1,49 @@
 # MDL file documentation
 
-The MDL files holds two data sections: the first section contains geometry data of each racer, and the second section is unknown.
+The MDL files holds two data sections: the first section contains geometry data for each object in the file, and the second section contains metadata about each object.
 
 ## File structure
 
 The file starts with a number indicating the section size.
 
-| Offset (h) | Size (h)  | Usage                             | Notes                                                                           |
-|:---------- |:--------- |:--------------------------------- |:------------------------------------------------------------------------------- |
-| 0x0        | 0x4u      | Half size of the geometry section | Multiplying this number by 2 gives you the offset of the mesh metadata section. |
+| Offset (h) | Size (h)  | Description                       |
+|:---------- |:--------- |:--------------------------------- |
+| 0x0        | 0x4u      | Half size of the geometry section |
+Size: 0x4 bytes
 
 ## Geometry Section
 
-The geometry section contains the coordinates, colors, drawing format (tri or quad) and palette information of the model vertexes.
+The geometry section contains an array of vertexes with the GPU render command, vertex colors, vertex position and texture coordinate positions. The game decides whether the next polygon is a triangle or a quad by looking at the GPU render command of the first vertex.
 
-| Offset (h) | Size (h) | Usage                               | Notes                                        |
-|:---------- |:-------- |:----------------------------------- |:-------------------------------------------- |
-| 0x0        | 0x1u     | Red                 | Vertex color intensity (R, G, B). Used as shading, since the model is textured. |
-| 0x1        | 0x1u     | Green               | Vertex color intensity (R, G, B). Used as shading, since the model is textured. |
-| 0x2        | 0x1u     | Blue                | Vertex color intensity (R, G, B). Used as shading, since the model is textured. |
-| 0x3        | 0x1u     | Color command (cmd) | This byte is ignored if you aren't reading the first vertex of a face. If cmd equals 0, then a new mesh starts. If a new mesh starts and the red color equals 2, then the object has a low LOD mesh. If cmd equals 0x38, then the next 3 vertexes will form a quad with the current vertex; if cmd does not equal 0x38, then the next 2 vertexes will make a triangle with the current vertex.                                                                   |
-| 0x4        | 0x2s     | X                   | Position of the vertex.                                                         |
-| 0x6        | 0x2s     | Y                   | Position of the vertex.                                                         |
-| 0x8        | 0x2s     | Z                   | Position of the vertex.                                                         |
-| 0xA        | 0x2s     | Vertex palette      | Texture data is still unknown.                                                  |
+| Offset (h) | Size (h) | Description         |
+|:---------- |:-------- |:------------------- |
+| 0x0        | 0x1u     | Vertex Color: Red   |
+| 0x1        | 0x1u     | Vertex Color: Green |
+| 0x2        | 0x1u     | Vertex Color: Blue  |
+| 0x3        | 0x1u     | GPU Render Command  |
+| 0x4        | 0x2s     | Position: X         |
+| 0x6        | 0x2s     | Position: Y         |
+| 0x8        | 0x2s     | Position: Z         |
+| 0xA        | 0x1u     | Texcoord: X         |
+| 0xB        | 0x1u     | Texcoord: Y         |
+Size: 0xC bytes
 
 ## Mesh metadata
 
-This section starts with a number indicating the number of objects in the file. Each object has a high LOD mesh, and may or may not have a low LOD mesh (LOD = Level of Detail).
+This section starts with a number indicating the number of objects in the file. Each object might have one or two meshes, for level of detail purposes.
 
-| Offset (h) | Size (h) | Usage                          | Notes |
-|:---------- |:-------- |:------------------------------ |:----- |
-| 0x0        | 0x4u     | Number of objects in the file. | N/a.  |
+| Offset (h) | Size (h) | Description                    |
+|:---------- |:-------- |:------------------------------ |
+| 0x0        | 0x4u     | Number of objects in the file. |
+Total size: 0x4
 
-It's followed by a data structure with size of 0x4C bytes, which contains metadata of each object.
+It's followed by a data structure with size of 0x4C bytes, which contains metadata for each object.
 
-| Offset (h) | Size (h) | Usage                                         | Notes                                                |
-|:---------- |:-------- |:--------------------------------------------- |:---------------------------------------------------- |
-| 0x0        | 0x4u     | Offset to the end of the object halved.       | Multiplying by 2 gives the true offset in the file.  |
-| 0x4        | 0x4s     | X translation.                                | Translation applied to both high and low LOD meshes. |
-| 0x8        | 0x4s     | Y translation.                                | Translation applied to both high and low LOD meshes. |
-| 0xC        | 0x4s     | Z translation.                                | Translation applied to both high and low LOD meshes. |
-| 0x10~0x48  | -        | Unknown.                                      | Unknown.                                             |
+| Offset (h) | Size (h) | Description                            |
+|:---------- |:-------- |:-------------------------------------- |
+| 0x0        | 0x4u     | Offset to the end of the object halved |
+| 0x4        | 0x4s     | Position: X translation                |
+| 0x8        | 0x4s     | Position: Y translation                |
+| 0xC        | 0x4s     | Position: Z translation                |
+| 0x10-0x4C  | -        | Unknown                                |
+Size: 0x4C bytes
